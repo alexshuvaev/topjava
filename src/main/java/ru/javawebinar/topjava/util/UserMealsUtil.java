@@ -37,7 +37,7 @@ public class UserMealsUtil {
             if (TimeUtil.isBetweenInclusive(meal.getDateTime().toLocalTime(), startTime, endTime)) {
                 resultList.add(
                         new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(),
-                                daysAndCalories.get(meal.getDateTime().toLocalDate()) <= caloriesPerDay));
+                                daysAndCalories.get(meal.getDateTime().toLocalDate()) > caloriesPerDay));
             }
         });
         return resultList;
@@ -50,7 +50,7 @@ public class UserMealsUtil {
         return meals.stream()
                 .filter(meal -> TimeUtil.isBetweenInclusive(meal.getDateTime().toLocalTime(), startTime, endTime))
                 .map(meal -> new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(),
-                        daysAndCalories.get(meal.getDateTime().toLocalDate()) <= caloriesPerDay))
+                        daysAndCalories.get(meal.getDateTime().toLocalDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
     }
 
