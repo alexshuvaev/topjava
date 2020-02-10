@@ -13,8 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -64,15 +62,8 @@ public class MealServlet extends HttpServlet {
         Meal meal = new Meal();
         meal.setDescription(request.getParameter("description"));
         meal.setCalories(Integer.parseInt(request.getParameter("calories")));
-        try {
-           LocalDateTime localDateTime = TimeUtil.convertToLocalDateTimeViaInstant(
-                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(request.getParameter("localDateTime")
-                    ));
-
-            meal.setDateTime(localDateTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        LocalDateTime localDateTime = TimeUtil.convertToLocalDateTime(request.getParameter("localDateTime"));
+        meal.setDateTime(localDateTime);
 
         String mealId = request.getParameter("id");
         if (mealId == null || mealId.isEmpty()) {
