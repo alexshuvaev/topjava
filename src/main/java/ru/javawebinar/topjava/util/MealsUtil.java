@@ -5,10 +5,9 @@ import ru.javawebinar.topjava.model.MealTo;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class MealsUtil {
@@ -19,21 +18,17 @@ public class MealsUtil {
                         Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories))
                 );
 
-        List<MealTo> list = new ArrayList<>();
-        AtomicInteger counter = new AtomicInteger(0);
+        List<MealTo> list = new CopyOnWriteArrayList<>();
         for (Meal meal : meals) {
             if (TimeUtil.isBetweenInclusive(meal.getTime(), startTime, endTime)) {
                 MealTo to = createTo(meal, caloriesSumByDate.get(meal.getDate()) > caloriesPerDay);
-                int id = counter.getAndIncrement();
-                to.setId(id);
                 list.add(to);
             }
         }
-        counter.set(0);
         return list;
     }
 
     private static MealTo createTo(Meal meal, boolean excess) {
-        return new MealTo(meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess);
+        return new MealTo(meal.getId(), meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess);
     }
 }

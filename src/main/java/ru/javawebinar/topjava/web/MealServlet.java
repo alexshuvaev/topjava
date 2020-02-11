@@ -5,9 +5,7 @@ import ru.javawebinar.topjava.dao.impl.MemoryMealDaoImpl;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.util.TimeUtil;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class MealServlet extends HttpServlet {
@@ -30,49 +29,61 @@ public class MealServlet extends HttpServlet {
         List<Meal> mealList = mealDao.getAll();
         List<MealTo> mealToList = MealsUtil.filteredByLoop(mealList, LocalTime.MIN, LocalTime.MAX, 2000);
 
-        String forward;
         String action = request.getParameter("action");
+        if (action == null) action = "mealList";
 
-        if (action.equalsIgnoreCase("delete")) {
-            int mealId = Integer.parseInt(request.getParameter("mealId"));
-            mealDao.delete(mealId);
-            response.sendRedirect(request.getContextPath() + "/meals?action=mealList");
-            return;
-        } else if (action.equalsIgnoreCase("edit")) {
-
-            int mealId = Integer.parseInt(request.getParameter("mealId"));
-            MealTo mealTo = mealToList.get(mealId);
-            forward = "/meal.jsp";
-            request.setAttribute("meal", mealTo);
-        } else if (action.equalsIgnoreCase("mealList")) {
-            forward = "/meals.jsp";
-            request.setAttribute("meals", mealToList);
-        } else {
-            forward = "/meal.jsp";
+        switch (action) {
+            case "delete":
+                mealDao.delete(Integer.parseInt(request.getParameter("mealId")));
+                response.sendRedirect(request.getContextPath() + "/meals");
+                break;
+            case "edit":
+                int mealId = Integer.parseInt(request.getParameter("mealId"));
+                MealTo mealTo;
+                for (MealTo elem : mealToList) {
+                    if (elem.getId() == mealId) {
+                        mealTo = mealToList.get(mealToList.indexOf(elem));
+                        request.setAttribute("meal", mealTo);
+                        request.getRequestDispatcher("/meal.jsp")
+                                .forward(request, response);
+                        return;
+                    }
+                }
+                break;
+            case "insert":
+                response.sendRedirect(request.getContextPath() + "/meal.jsp");
+                break;
+            default:
+                request.setAttribute("meals", mealToList);
+                request.getRequestDispatcher("/meals.jsp")
+                        .forward(request, response);
+                break;
         }
-
-        RequestDispatcher view = request.getRequestDispatcher(forward);
-        view.forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
 
-        Meal meal = new Meal();
-        meal.setDescription(request.getParameter("description"));
-        meal.setCalories(Integer.parseInt(request.getParameter("calories")));
-        LocalDateTime localDateTime = TimeUtil.convertToLocalDateTime(request.getParameter("localDateTime"));
-        meal.setDateTime(localDateTime);
+        Meal meal = new Meal(
+                LocalDateTime.parse(
+                        request.getParameter("localDateTime"),
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
+                ),
+                request.getParameter("description"),
+                Integer.parseInt(request.getParameter("calories"))
+        );
 
         String mealId = request.getParameter("id");
         if (mealId == null || mealId.isEmpty()) {
             mealDao.add(meal);
         } else {
             int id = Integer.parseInt(mealId);
+            meal.setId(id);
             mealDao.update(meal, id);
+            System.out.println(meal.getDescription() + " " + meal.getId() + " " + id);
         }
 
-        response.sendRedirect("meals?action=mealList");
+        response.sendRedirect(request.getContextPath() + "/meals");
     }
 }

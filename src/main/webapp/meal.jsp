@@ -20,6 +20,6 @@
     <input type="hidden" name="id" value="${meal.id}">
     <input type="submit" value="Submit"/>
 </form>
-<p><a href="meals?action=mealList">To meals list</a></p>
+<p><a href="meals">To meals list</a></p>
 </body>
 </html>
