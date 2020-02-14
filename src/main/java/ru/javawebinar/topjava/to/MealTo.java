@@ -1,4 +1,4 @@
-package ru.javawebinar.topjava.model;
+package ru.javawebinar.topjava.to;
 
 import java.time.LocalDateTime;
 
@@ -43,7 +43,7 @@ public class MealTo {
 
     @Override
     public String toString() {
-        return "MealTo{" +
+        return "\nMealTo{" +
                 "id=" + id +
                 ", dateTime=" + dateTime +
                 ", description='" + description + '\'' +
