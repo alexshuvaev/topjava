@@ -18,13 +18,17 @@ public class MealsUtil {
     public static final int DEFAULT_CALORIES_PER_DAY = 2000;
 
     public static final List<Meal> MEALS = Arrays.asList(
-            new Meal(LocalDateTime.of(2020, Month.JANUARY, 29, 10, 0), "Завтрак", 500, 2),
-            new Meal(LocalDateTime.of(2020, Month.JANUARY, 30, 13, 0), "Обед", 1000,2),
-            new Meal(LocalDateTime.of(2020, Month.FEBRUARY, 5, 20, 0), "Ужин", 500,2),
-            new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 0, 0), "Еда на граничное значение", 100,2),
-            new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 10, 0), "Завтрак", 1000,2),
-            new Meal(LocalDateTime.of(2020, Month.FEBRUARY, 10, 13, 0), "Обед", 500,4),
-            new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 20, 0), "Ужин", 410,2)
+            new Meal(LocalDateTime.of(2020, Month.FEBRUARY, 2, 10, 0), "Завтрак", 500, 1),
+            new Meal(LocalDateTime.of(2020, Month.FEBRUARY, 2, 13, 0), "Обед", 1000,1),
+            new Meal(LocalDateTime.of(2020, Month.FEBRUARY, 1, 20, 0), "Еда", 500,1),
+            new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 0, 0), "Еда на граничное значение", 100,1),
+            new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 13, 30), "Обед", 1000,1),
+            new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 19, 0), "Ужин", 500,1),
+            new Meal(LocalDateTime.of(2020, Month.JANUARY, 29, 23, 59), "Ужин", 410,2),
+            new Meal(LocalDateTime.of(2020, Month.JANUARY, 30, 7, 0), "Завтрак", 410,2),
+            new Meal(LocalDateTime.of(2020, Month.JANUARY, 30, 11, 0), "Обед", 410,2),
+            new Meal(LocalDateTime.of(2020, Month.JANUARY, 30, 20, 0), "Ужин", 410,2),
+            new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 12, 0), "Обед", 410,2)
     );
 
     public static List<MealTo> getTos(Collection<Meal> meals, int caloriesPerDay) {
@@ -32,14 +36,13 @@ public class MealsUtil {
     }
 
     public static List<MealTo> getFilteredTos(Collection<Meal> meals, int caloriesPerDay, LocalTime startTime, LocalTime endTime) {
-        return filteredByStreams(meals, caloriesPerDay, meal -> DateTimeUtil.isBetweenInclusive(meal.getTime(), startTime, endTime));
+        return filteredByStreams(meals, caloriesPerDay, meal -> DateTimeUtil.isBetween(meal.getTime(), startTime, endTime));
     }
 
     public static List<MealTo> filteredByStreams(Collection<Meal> meals, int caloriesPerDay, Predicate<Meal> filter) {
         Map<LocalDate, Integer> caloriesSumByDate = meals.stream()
                 .collect(
                         Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories))
-//                      Collectors.toMap(Meal::getDate, Meal::getCalories, Integer::sum)
                 );
 
         return meals.stream()

@@ -43,7 +43,7 @@ public class MealTo {
 
     @Override
     public String toString() {
-        return "\nMealTo{" +
+        return "MealTo{" +
                 "id=" + id +
                 ", dateTime=" + dateTime +
                 ", description='" + description + '\'' +
