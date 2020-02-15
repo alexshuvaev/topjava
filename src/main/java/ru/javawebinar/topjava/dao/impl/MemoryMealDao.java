@@ -5,17 +5,21 @@ import ru.javawebinar.topjava.model.Meal;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-public class MemoryMealDaoImpl implements MealDao {
-    private List<Meal> mealList;
+public class MemoryMealDao implements MealDao {
+    private Map<Integer, Meal> repository = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger(0);
 
-    public MemoryMealDaoImpl() {
-        mealList = new CopyOnWriteArrayList<>(
+    public MemoryMealDao() {
+        List<Meal> mealList = new ArrayList<>(
                 Arrays.asList(
                         new Meal(counter.getAndIncrement(), LocalDateTime.of(2020, Month.FEBRUARY, 5, 8, 0), "Завтрак", 200),
                         new Meal(counter.getAndIncrement(), LocalDateTime.of(2020, Month.FEBRUARY, 5, 13, 30), "Обед", 500),
@@ -31,30 +35,35 @@ public class MemoryMealDaoImpl implements MealDao {
                         new Meal(counter.getAndIncrement(), LocalDateTime.of(2020, Month.FEBRUARY, 7, 14, 0), "Обед", 700),
                         new Meal(counter.getAndIncrement(), LocalDateTime.of(2020, Month.FEBRUARY, 7, 19, 0), "Ужин", 500))
         );
+
+        mealList.forEach(this::add);
     }
 
     @Override
     public List<Meal> getAll() {
-        return mealList;
+        return repository.values().stream()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Meal get(int id) {
+        return repository.get(id);
     }
 
     @Override
     public void add(Meal meal) {
         meal.setId(counter.getAndIncrement());
-        mealList.add(meal);
+        repository.put(meal.getId(), meal);
     }
 
     @Override
     public void delete(int mealId) {
-        mealList.removeIf(meal -> meal.getId() == mealId);
+        repository.entrySet()
+                .removeIf(meal ->meal.getValue().getId() == mealId);
     }
 
     @Override
     public void update(Meal meal, int mealId) {
-        for (Meal elem : mealList) {
-            if (elem.getId() == mealId) {
-                mealList.set(mealList.indexOf(elem), meal);
-            }
-        }
+        repository.computeIfPresent(mealId, (id, oldMeal) -> meal);
     }
 }

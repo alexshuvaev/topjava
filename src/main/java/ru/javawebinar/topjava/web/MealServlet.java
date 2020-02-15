@@ -1,7 +1,7 @@
 package ru.javawebinar.topjava.web;
 
 import ru.javawebinar.topjava.dao.MealDao;
-import ru.javawebinar.topjava.dao.impl.MemoryMealDaoImpl;
+import ru.javawebinar.topjava.dao.impl.MemoryMealDao;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
@@ -21,7 +21,7 @@ public class MealServlet extends HttpServlet {
     private MealDao mealDao;
 
     public MealServlet() {
-        this.mealDao = new MemoryMealDaoImpl();
+        this.mealDao = new MemoryMealDao();
     }
 
     @Override
@@ -35,20 +35,14 @@ public class MealServlet extends HttpServlet {
         switch (action) {
             case "delete":
                 mealDao.delete(Integer.parseInt(request.getParameter("mealId")));
-                response.sendRedirect(request.getContextPath() + "/meals");
+                response.sendRedirect( "meals");
                 break;
             case "edit":
                 int mealId = Integer.parseInt(request.getParameter("mealId"));
-                MealTo mealTo;
-                for (MealTo elem : mealToList) {
-                    if (elem.getId() == mealId) {
-                        mealTo = mealToList.get(mealToList.indexOf(elem));
-                        request.setAttribute("meal", mealTo);
+                Meal meal = mealDao.get(mealId);
+                        request.setAttribute("meal", meal);
                         request.getRequestDispatcher("/meal.jsp")
                                 .forward(request, response);
-                        return;
-                    }
-                }
                 break;
             case "insert":
                 response.sendRedirect(request.getContextPath() + "/meal.jsp");
@@ -81,9 +75,8 @@ public class MealServlet extends HttpServlet {
             int id = Integer.parseInt(mealId);
             meal.setId(id);
             mealDao.update(meal, id);
-            System.out.println(meal.getDescription() + " " + meal.getId() + " " + id);
         }
 
-        response.sendRedirect(request.getContextPath() + "/meals");
+        response.sendRedirect("meals");
     }
 }
