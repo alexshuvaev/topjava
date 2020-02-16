@@ -11,6 +11,7 @@ import ru.javawebinar.topjava.util.MealsUtil;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 public class InMemoryMealRepository implements MealRepository {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private Map<Integer, Meal> repository = new ConcurrentHashMap<>();
+    private Map<Integer, HashMap<Integer, Meal>> repository = new ConcurrentHashMap<>();
 
     private AtomicInteger counter = new AtomicInteger(0);
 
@@ -29,53 +30,51 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     @Override
-    public Meal save(Meal meal, int userId) {
+    public Meal save(Meal meal, Integer userId) {
         if (meal.isNew()) {
             log.info("save new meal={}, userId={}", meal, userId);
             meal.setId(counter.incrementAndGet());
-            repository.put(meal.getId(), meal);
+            meal.setUserId(userId);
+            if (repository.containsKey(userId)) {
+                repository.get(userId).put(meal.getId(), meal);
+            } else {
+                HashMap<Integer, Meal> theMeal = new HashMap<>();
+                theMeal.put(meal.getId(), meal);
+                repository.put(userId, theMeal);
+            }
             return meal;
         }
-        Meal updatingMeal = get(meal.getId(), userId);
-        if (updatingMeal != null && userId == meal.getUserId() && userId == updatingMeal.getUserId()) {
-            log.info("update meal={}, userId={}", updatingMeal, userId);
-            return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
-        } else {
-            return null;
-        }
+
+        log.info("update meal={}, userId={}", meal, userId);
+        return repository.get(userId).computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
-    public boolean delete(int id, int userId) {
+    public boolean delete(Integer id, Integer userId) {
         log.info("delete meal: id={}, userId={}", id, userId);
-        return repository.entrySet().removeIf(entry ->
-                id == entry.getKey() && userId == entry.getValue().getUserId());
+        return repository.get(userId).values()
+                .removeIf(meal -> meal.getId().equals(id));
     }
 
     @Override
-    public Meal get(int id, int userId) {
+    public Meal get(Integer id, Integer userId) {
         log.info("get meal: id={}, userId={}", id, userId);
-        return repository.entrySet().stream()
-                .filter(meal -> meal.getValue().getUserId() == userId)
-                .filter(meal -> meal.getKey() == id)
-                .map(Map.Entry::getValue)
-                .findAny()
-                .orElse(null);
+        return repository.get(userId).get(id);
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
+    public Collection<Meal> getAll(Integer userId) {
         log.info("get all meal with userId={}", userId);
-        return repository.values().stream()
-                .filter(meal -> userId == meal.getUserId())
+        return repository.get(userId).values().stream()
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<Meal> getFilteredByDate(int userId, LocalDate startDate, LocalDate endDate) {
-        return getAll(userId).stream()
-                .filter(meal -> DateTimeUtil.isBetween(meal.getDate(),startDate, endDate))
+    public Collection<Meal> getFilteredByDate(Integer userId, LocalDate startDate, LocalDate endDate) {
+        return repository.get(userId).values().stream()
+                .filter(meal -> DateTimeUtil.isBetween(meal.getDate(), startDate, endDate))
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
 }

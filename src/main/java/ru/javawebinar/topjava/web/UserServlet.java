@@ -22,8 +22,8 @@ public class UserServlet extends HttpServlet {
             case "1":
             case "2":
                 setAuthUserId(Integer.parseInt(signedUser));
-                log.debug("redirect to index.html");
-                response.sendRedirect(request.getContextPath());
+                log.debug("redirect to meals list");
+                response.sendRedirect("meals");
                 break;
             default:
                 log.debug("forward to users");

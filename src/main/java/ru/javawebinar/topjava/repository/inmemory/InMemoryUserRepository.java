@@ -23,8 +23,8 @@ public class InMemoryUserRepository implements UserRepository {
     public InMemoryUserRepository() {
         List<User> users = Arrays.asList(
                 new User(null,"Alex","alex@gmail.com","123456", Role.ROLE_ADMIN),
+                new User(null,"Mark","caesar121@gmail.com","123456", 2500, true, Collections.singleton(Role.ROLE_USER)),
                 new User(null,"Mark","mark@gmail.com","123456", 2500, true, Collections.singleton(Role.ROLE_USER)),
-                new User(null,"Mark","marka@gmail.com","123456", 2500, true, Collections.singleton(Role.ROLE_USER)),
                 new User(null,"Emma","emma@gmail.com","123456", 1800, true, Collections.singleton(Role.ROLE_USER)),
                 new User(null,"Mia","mia@gmail.com","123456", 1300, true, Collections.singleton(Role.ROLE_USER)),
                 new User(null,"Archie","archie@gmail.com","123456", 1800, true, Collections.singleton(Role.ROLE_USER)),
@@ -35,7 +35,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public boolean delete(int id) {
+    public boolean delete(Integer id) {
         log.info("delete user with id={}", id);
         return repository.remove(id) != null;
     }
@@ -53,7 +53,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User get(int id) {
+    public User get(Integer id) {
         log.info("get user with id={}", id);
         return repository.get(id);
     }
@@ -62,7 +62,8 @@ public class InMemoryUserRepository implements UserRepository {
     public List<User> getAll() {
         log.info("getAll users");
         return repository.values().stream()
-                .sorted(Comparator.comparing(User::getName))
+                .sorted(Comparator.comparing(User::getName)
+                        .thenComparing(User::getEmail))
                 .collect(Collectors.toList());
     }
 

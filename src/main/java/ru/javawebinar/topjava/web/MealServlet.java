@@ -19,10 +19,10 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-import static ru.javawebinar.topjava.web.SecurityUtil.getAuthUserId;
-
 public class MealServlet extends HttpServlet {
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    ConfigurableApplicationContext appCtx;
 
     private MealRestController mealRestController;
 
@@ -34,6 +34,12 @@ public class MealServlet extends HttpServlet {
     }
 
     @Override
+    public void destroy() {
+        super.destroy();
+        appCtx.close();
+    }
+
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String id = request.getParameter("id");
@@ -41,7 +47,7 @@ public class MealServlet extends HttpServlet {
         Meal meal = new Meal(id.isEmpty() ? null : Integer.parseInt(id),
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
-                Integer.parseInt(request.getParameter("calories")), getAuthUserId());
+                Integer.parseInt(request.getParameter("calories")),null);
         log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
 
         if (id.isEmpty()) mealRestController.create(meal);
@@ -64,7 +70,7 @@ public class MealServlet extends HttpServlet {
             case "create":
             case "update":
                 final Meal meal = "create".equals(action) ?
-                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000, SecurityUtil.getAuthUserId()) :
+                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000, null) :
                         mealRestController.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);

@@ -78,7 +78,7 @@ public class User extends AbstractNamedEntity {
 
     @Override
     public String toString() {
-        return "User (" +
+        return "\nUser (" +
                 "id=" + id +
                 ", email=" + email +
                 ", name=" + name +

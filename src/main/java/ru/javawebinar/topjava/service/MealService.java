@@ -4,14 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
-import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Collection;
-import java.util.List;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
 
@@ -24,27 +19,27 @@ public class MealService {
         this.repository = repository;
     }
 
-    public Meal create(Meal meal, int userId) {
+    public Meal create(Meal meal, Integer userId) {
         return repository.save(meal, userId);
     }
 
-    public void delete(int id, int userId) {
+    public void delete(int id, Integer userId) {
         checkNotFoundWithId(repository.delete(id, userId), id);
     }
 
-    public Meal get(int id, int userId) {
+    public Meal get(int id, Integer userId) {
         return checkNotFoundWithId(repository.get(id, userId), id);
     }
 
-    public List<MealTo> getAll(int userId, LocalTime startTime, LocalTime endTime) {
-        return MealsUtil.getFilteredTos(repository.getAll(userId), SecurityUtil.authUserCaloriesPerDay(), startTime, endTime);
+    public Collection<Meal> getAll(Integer userId) {
+        return repository.getAll(userId);
     }
 
-    public Collection<Meal> getFilteredByDate(int userId, LocalDate startDate, LocalDate endDate){
+    public Collection<Meal> getFilteredByDate(Integer userId, LocalDate startDate, LocalDate endDate){
         return repository.getFilteredByDate(userId, startDate, endDate);
     }
 
-    public void update(Meal meal, int userId) {
+    public void update(Meal meal, Integer userId) {
         checkNotFoundWithId(repository.save(meal, userId), meal.getId());
     }
 }
