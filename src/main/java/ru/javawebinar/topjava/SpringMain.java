@@ -17,7 +17,7 @@ public class SpringMain {
         try (ConfigurableApplicationContext appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml")) {
             System.out.println("Bean definition names: " + Arrays.toString(appCtx.getBeanDefinitionNames()));
            MealRestController controller = appCtx.getBean(MealRestController.class);
-            SecurityUtil.setAuthUserId(1);
+            //SecurityUtil.setAuthUserId(5);
             //controller.get(2);
             //controller.delete(2);
         }

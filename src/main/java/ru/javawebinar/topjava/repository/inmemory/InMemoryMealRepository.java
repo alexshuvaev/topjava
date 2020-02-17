@@ -24,14 +24,13 @@ public class InMemoryMealRepository implements MealRepository {
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.MEALS.forEach(meal -> save(meal, meal.getUserId()));
+        MealsUtil.MEALS.forEach(meal -> save(meal, 1));
     }
 
     @Override
     public Meal save(Meal meal, Integer userId) {
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            meal.setUserId(userId);
             log.info("save new meal={}, userId={}", meal, userId);
             HashMap<Integer, Meal> theMeal = new HashMap<>();
             theMeal.put(meal.getId(), meal);
