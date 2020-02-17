@@ -35,7 +35,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public boolean delete(Integer id) {
+    public boolean delete(int id) {
         log.info("delete user with id={}", id);
         return repository.remove(id) != null;
     }
@@ -53,7 +53,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User get(Integer id) {
+    public User get(int id) {
         log.info("get user with id={}", id);
         return repository.get(id);
     }

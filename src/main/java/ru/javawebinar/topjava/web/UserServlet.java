@@ -29,6 +29,5 @@ public class UserServlet extends HttpServlet {
                 log.debug("forward to users");
                 request.getRequestDispatcher("/users.jsp").forward(request, response);
         }
-
     }
 }
