@@ -32,23 +32,24 @@ public class InMemoryMealRepository implements MealRepository {
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
             log.info("save new meal={}, userId={}", meal, userId);
+
             HashMap<Integer, Meal> theMeal = new HashMap<>();
             theMeal.put(meal.getId(), meal);
 
-            Map<Integer, Meal> m = repository.putIfAbsent(userId, theMeal);
-            repository.getOrDefault(userId, m).put(meal.getId(), meal);
+            repository.putIfAbsent(userId, theMeal);
+            repository.get(userId).put(meal.getId(), meal);
             return meal;
         }
-
+        Map<Integer, Meal> mealMap = repository.get(userId);
         log.info("update meal={}, userId={}", meal, userId);
-        return repository.get(userId).computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+        return mealMap != null ? mealMap.computeIfPresent(meal.getId(), (id, oldMeal) -> meal) : null;
     }
 
     @Override
     public boolean delete(Integer id, Integer userId) {
         log.info("delete meal: id={}, userId={}", id, userId);
         return repository.getOrDefault(userId, Collections.emptyMap()).values()
-                .removeIf(meal -> meal.getId().equals(id));
+                .remove(id);
     }
 
     @Override
