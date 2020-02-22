@@ -29,27 +29,23 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public Meal save(Meal meal, Integer userId) {
+        Map<Integer, Meal> mealMap = repository.computeIfAbsent(userId,ConcurrentHashMap::new);
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
             log.info("save new meal={}, userId={}", meal, userId);
-
-            HashMap<Integer, Meal> theMeal = new HashMap<>();
-            theMeal.put(meal.getId(), meal);
-
-            repository.putIfAbsent(userId, theMeal);
-            repository.get(userId).put(meal.getId(), meal);
+            mealMap.put(meal.getId(), meal);
             return meal;
         }
-        Map<Integer, Meal> mealMap = repository.get(userId);
+
         log.info("update meal={}, userId={}", meal, userId);
-        return mealMap != null ? mealMap.computeIfPresent(meal.getId(), (id, oldMeal) -> meal) : null;
+        return mealMap.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
     public boolean delete(Integer id, Integer userId) {
         log.info("delete meal: id={}, userId={}", id, userId);
-        return repository.getOrDefault(userId, Collections.emptyMap()).values()
-                .remove(id);
+        Map<Integer, Meal> mealMap = repository.get(userId);
+        return mealMap != null && mealMap.remove(id) != null;
     }
 
     @Override
