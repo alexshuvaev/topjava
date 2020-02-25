@@ -4,8 +4,11 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="ru.javawebinar.topjava.web.user"/>
-    <context:component-scan base-package="ru.javawebinar.topjava.service"/>
+    <import resource="spring-all-module.xml"/>
+
+    <bean id="jdbcMealRepository" class="ru.javawebinar.topjava.repository.inmemory.InMemoryMealRepository" primary="true"/>
+    <bean id="jdbcUserRepository" class="ru.javawebinar.topjava.repository.inmemory.InMemoryUserRepository" primary="true"/>
+
     <context:component-scan base-package="ru.javawebinar.topjava.repository.inmemory"/>
 
 </beans>

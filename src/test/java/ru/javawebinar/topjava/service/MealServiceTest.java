@@ -46,7 +46,7 @@ public class MealServiceTest {
 
     @Test
     public void get() {
-        Meal meal = service.get(100002, USER_ID);
+        Meal meal = service.get(MEAL_USER_1.getId(), USER_ID);
         assertMatch(meal, MEAL_USER_1);
     }
 
@@ -64,23 +64,23 @@ public class MealServiceTest {
     public void update() {
         Meal updated = getUpdated();
         service.update(updated, USER_ID);
-        assertMatch(service.get(100002, USER_ID), updated);
+        assertMatch(service.get(MEAL_USER_1.getId(), USER_ID), updated);
     }
 
     @Test(expected = NotFoundException.class)
     public void delete() {
-        service.delete(100002, USER_ID);
-        service.get(100002, USER_ID);
+        service.delete(MEAL_USER_1.getId(), USER_ID);
+        service.get(MEAL_USER_1.getId(), USER_ID);
     }
 
     @Test(expected = NotFoundException.class)
     public void deleteForeignMeal() {
-        service.delete(100010, USER_ID);
+        service.delete(MEAL_USER_FOR_NOT_FOUND.getId(), USER_ID);
     }
 
     @Test(expected = NotFoundException.class)
     public void getForeignMeal() {
-        service.get(100010, USER_ID);
+        service.get(MEAL_USER_FOR_NOT_FOUND.getId(), USER_ID);
     }
 
     @Test(expected = NotFoundException.class)
