@@ -1,13 +1,20 @@
 package ru.javawebinar.topjava.service;
 
 import org.junit.Assert;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import ru.javawebinar.topjava.JUnitStopWatch;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
@@ -26,11 +33,38 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
+    private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
 
     @Autowired
     private MealService service;
     @Autowired
     private MealRepository repository;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Rule
+    public JUnitStopWatch stopWatch = new JUnitStopWatch();
+
+    @ClassRule
+    public static ExternalResource resource = new ExternalResource() {
+        long startTest;
+
+        @Override
+        protected void before() throws Throwable {
+            startTest = System.currentTimeMillis();
+        }
+
+        @Override
+        protected void after() {
+            String air = "=====================================\n";
+            long result = System.currentTimeMillis() - startTest;
+            log.debug("\n\n" + air + air +
+                    "MealServiceTest.class\n" +
+                    "Duration: "+ result + "ms.\n" +
+                    air + air + "\n\n");
+        }
+    };
 
     @Test
     public void delete() throws Exception {
@@ -38,13 +72,15 @@ public class MealServiceTest {
         Assert.assertNull(repository.get(MEAL1_ID, USER_ID));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void deleteNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.delete(1, USER_ID);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void deleteNotOwn() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.delete(MEAL1_ID, ADMIN_ID);
     }
 
@@ -64,13 +100,15 @@ public class MealServiceTest {
         MEAL_MATCHER.assertMatch(actual, ADMIN_MEAL1);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void getNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.get(1, USER_ID);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void getNotOwn() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.get(MEAL1_ID, ADMIN_ID);
     }
 
@@ -81,8 +119,9 @@ public class MealServiceTest {
         MEAL_MATCHER.assertMatch(service.get(MEAL1_ID, USER_ID), updated);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void updateNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.update(MEAL1, ADMIN_ID);
     }
 
