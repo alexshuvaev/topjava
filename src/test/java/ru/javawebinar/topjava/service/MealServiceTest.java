@@ -52,17 +52,12 @@ public class MealServiceTest {
 
         @Override
         protected void before() throws Throwable {
-            startTest = System.currentTimeMillis();
+            startTest = System.nanoTime();
         }
 
         @Override
         protected void after() {
-            String air = "=====================================\n";
-            long result = System.currentTimeMillis() - startTest;
-            log.debug("\n\n" + air + air +
-                    "MealServiceTest.class\n" +
-                    "Duration: "+ result + "ms.\n" +
-                    air + air + "\n\n");
+            log.debug("\n\n" + JUnitStopWatch.getResult());
         }
     };
 

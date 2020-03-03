@@ -10,17 +10,21 @@ import java.util.concurrent.TimeUnit;
 public class JUnitStopWatch extends Stopwatch {
     private static final Logger log = LoggerFactory.getLogger(JUnitStopWatch.class);
 
+    private static StringBuilder result = new StringBuilder();
+
     private static void logInfo(Description description, long nanos) {
         String testName = description.getMethodName();
-        String air = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-        log.debug("\n\n" + air + air +
-                testName + " " + "\n" +
-                "Duration: " + TimeUnit.NANOSECONDS.toMillis(nanos) + "ms.\n" +
-                air + air + "\n\n");
+        String duration = testName + " – " + TimeUnit.NANOSECONDS.toMillis(nanos) + "ms.\n";
+        result.append(duration);
+        log.debug("\n\n" + duration);
     }
 
     @Override
     protected void finished(long nanos, Description description) {
         logInfo(description, nanos);
+    }
+
+    public static String getResult() {
+        return result.toString();
     }
 }
